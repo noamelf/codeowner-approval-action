@@ -1,7 +1,0 @@
-site_name: codeowner-approval-action Docs
-repo_url: https://github.com/bluevine-dev/codeowner-approval-action/
-theme: readthedocs
-edit_uri: edit/master/docs/
-
-nav:
-  - Home: README.md

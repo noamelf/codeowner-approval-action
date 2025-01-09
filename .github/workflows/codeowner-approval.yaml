@@ -1,0 +1,15 @@
+name: "Code Owner Approval Workflow"
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  codeowners-approval:
+    uses: noamelf/codeowner-approval-action/.github/workflows/codeowner-approval-template.yaml@master
+    with:
+      app-id: ${{ MY_APP_ID }}
+      pr-number: ${{ github.event.pull_request.number }}
+      repo-name: ${{ github.repository }}
+    secrets:
+      app-secret-key: ${{ MY_APP_SECRET_KEY }}

@@ -1,0 +1,17 @@
+name: "Codeowner Approval Checker"
+description: "Ensure all code owners (including GitHub teams) approve a PR before merging."
+inputs:
+  pr-number:
+    description: "Pull request number"
+    required: true
+  repo-name:
+    description: "Repository name"
+    required: true
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - --pr-number
+    - ${{ inputs.pr-number }}
+    - --repo-name
+    - ${{ inputs.repo-name }}

@@ -1,0 +1,31 @@
+exclude: '.git|.tox'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.5
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+        args: [ --line-length=120 ]
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.41.0
+    hooks:
+    - id: markdownlint-fix
+      args: ["--disable", "MD004", "MD013", "MD031", "MD032", "MD045", "--"]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-PyYAML]
+        exclude: "build/"

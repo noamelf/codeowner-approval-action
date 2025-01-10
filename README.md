@@ -1,17 +1,79 @@
 # Codeowners Approval Action
 
-This action ensures that all codeowners, defined in the `CODEOWNERS` file, have approved a pull request before it can be merged. The action provides enhanced functionality by supporting multiple codeowners per line in the `CODEOWNERS` file, ensuring that **every codeowner listed for a file is required to approve the pull request**.
+This GitHub Action extends the functionality of GitHub's `CODEOWNERS` feature by requiring **all codeowners** listed for a file or directory to approve a pull request before it can be merged. This ensures stricter review policies, particularly for critical or shared code areas.
 
-## Key Features
+## Why Use This Action?
 
-- **Multiple Codeowners Per File**: GitHub’s default behavior only requires **one** codeowner from a list to approve a pull request. This action enforces that **all codeowners listed for a file or directory must approve** the pull request before it can be merged. This ensures stronger review policies, particularly for critical or shared code areas.
+By default, GitHub only requires **one** codeowner's approval, even if multiple codeowners are listed. This action enforces that **every codeowner must approve**, providing better safeguards for code quality and accountability.
 
-## Usage
+For example, given the following line in a `CODEOWNERS` file:
 
-To use this action, create a new workflow file in your repository under the `.github/workflows` directory. For example, create `.github/workflows/codeowners-approval.yml`.
+```plaintext
+* @noamelf @otherdev
+```
+
+Both `@noamelf` and `@otherdev` must approve any pull request affecting files in the repository. Without this action, only one of these approvals would be required.
+
+---
+
+## How It Works
+
+The action is triggered by the `pull_request_review` event when a review is submitted. It scans the `CODEOWNERS` file for the pull request's files and verifies that all listed codeowners, including individuals and teams, have approved the changes.
+
+---
+
+## Setup Instructions
+
+1. **Create a Workflow File:**  \
+   Add a new workflow in the `.github/workflows` directory. For example, create `.github/workflows/codeowners-approval.yml` with the following content:
+
+   ```yaml
+   name: "Codeowners Approval Workflow"
+
+   on:
+     pull_request_review:
+       types: [submitted]
+
+   jobs:
+     codeowners-approval:
+       runs-on: ubuntu-latest
+       steps:
+         - name: Check Codeowners Approval
+           uses: noamelf/codeowner-approval-action@main
+           with:
+             pr-number: ${{ github.event.pull_request.number }}
+             repo-name: ${{ github.repository }}
+             github-token: ${{ secrets.MY_GITHUB_TOKEN }}
+   ```
+
+2. **Provide a GitHub Token:**  \
+   This action requires a token with enhanced permissions to read organization teams. The next section explains how to set this up.
+
+---
+
+## Token Permissions
+
+To handle teams in the `CODEOWNERS` file, the action requires a GitHub token with the following permissions:
+
+- `read:repo`
+- `read:org`
+
+### Options to Provide the Token
+
+1. **Personal Access Token (Simpler Setup):**  \
+   Create a personal access token with the required permissions and add it as a repository secret (e.g., `MY_GITHUB_TOKEN`).
+
+2. **GitHub App Token (Recommended for Organizations):**  \
+   Use a GitHub App for token generation. This is more secure and scalable for larger organizations.
+
+---
+
+### Using a GitHub App Token
+
+Here’s an example workflow using a GitHub App token:
 
 ```yaml
-name: "Code Owner Approval Workflow"
+name: "Codeowners Approval Workflow"
 
 on:
   pull_request_review:
@@ -21,31 +83,27 @@ jobs:
   codeowners-approval:
     runs-on: ubuntu-latest
     steps:
-      - name: Codeowners Approval Check
-        uses: noamelf/codeowner-approval-action/.github/workflows/codeowner-approval-template.yaml@master
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.app-id }}
+          private-key: ${{ secrets.app-private-key }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Check Codeowners Approval
+        uses: noamelf/codeowner-approval-action@main
         with:
           pr-number: ${{ github.event.pull_request.number }}
           repo-name: ${{ github.repository }}
-        env:
-          BV_CI_GH_APP_PRIVATE_KEY: ${{ secrets.BV_CI_GH_APP_PRIVATE_KEY }}
+          github-token: ${{ steps.app-token.outputs.token }}
 ```
 
-### Multiple Codeowners Per Line
+- **`app-id`**: The ID of your GitHub App.  
+- **`app-private-key`**: The private key for your GitHub App.  
+- **`owner`**: The organization name.
 
-In the `CODEOWNERS` file, you can define multiple codeowners for a specific file or directory by listing multiple GitHub handles or teams per line. This action ensures that **all codeowners listed on the same line must approve the pull request**.
+This workflow generates a token via the `actions/create-github-app-token@v1` action and passes it to the `codeowner-approval-action`.
 
-For example:
+---
 
-```plaintext
-* @noamelf @otherdev
-```
-
-With this action, both the core and devops teams must approve the pull request for any changes to files in the repo, unlike GitHub’s default behavior where only one approval would be required.
-
-## Setting Up Branch Protection Rules
-
-To make this check mandatory for merging, you can add it to your branch protection rules by going to your repository’s `Settings > Branches` and adding this workflow to the required status checks.
-
-## Conclusion
-
-The `Codeowners Approval Action` ensures that all relevant codeowners must approve changes before they can be merged, offering stricter control than GitHub's default behavior, which only requires one codeowner’s approval. This is especially useful for teams managing critical or shared code areas.
+By following these steps, you can enforce stricter code review policies for your repository, ensuring that all stakeholders approve critical changes before they are merged.

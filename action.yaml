@@ -7,9 +7,14 @@ inputs:
   repo-name:
     description: "Repository name"
     required: true
+  github-token:
+    description: "GitHub token"
+    required: true
 runs:
   using: "docker"
   image: "Dockerfile"
+  env:
+    GITHUB_TOKEN: ${{ inputs.github-token }}
   args:
     - --pr-number
     - ${{ inputs.pr-number }}

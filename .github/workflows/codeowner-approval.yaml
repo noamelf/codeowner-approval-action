@@ -8,16 +8,9 @@ jobs:
   codeowners-approval:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ vars.app-id }}
-          private-key: ${{ secrets.app-private-key }}
-          owner: ${{ github.repository_owner }}
-
       - name: Check Code Owner Approval
         uses: noamelf/codeowner-approval-action@main 
         with:
           pr-number: ${{ github.event.pull_request.number }}
           repo-name: ${{ github.repository }}
-          github-token: ${{ steps.app-token.outputs.token }}
+          github-token: ${{ secrets.MY_GITHUB_TOKEN }}

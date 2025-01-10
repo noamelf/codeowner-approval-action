@@ -80,13 +80,10 @@ def get_team_members(org: Organization.Organization, team_slug: str) -> list[str
     """
     Fetches the members of a GitHub team by its slug.
     """
-    try:
-        team = org.get_team_by_slug(team_slug)
-        members = [member.login for member in team.get_members()]
-        logging.debug(f"Fetched team members for team: {team_slug}")
-        return members
-    except Exception as e:
-        raise Exception(f"Failed to fetch team members for '{team_slug}': {str(e)}")
+    team = org.get_team_by_slug(team_slug)
+    members = [member.login for member in team.get_members()]
+    logging.debug(f"Fetched team members for team: {team_slug}")
+    return members
 
 
 def get_file_owners(codeowners: CodeOwners, filepath: str) -> list[tuple[str, str]]:
@@ -97,7 +94,7 @@ def get_file_owners(codeowners: CodeOwners, filepath: str) -> list[tuple[str, st
 
 
 def get_missing_approvals_for_file(
-    file: str, codeowners: CodeOwners, approved_reviews: list[str], org: Organization.Organization
+    file: str, codeowners: CodeOwners, approved_reviews: list[str], org: Organization.Organization | None
 ) -> list[str]:
     """
     Checks if all owners (teams and individuals) for a file have approved the PR.
@@ -119,7 +116,7 @@ def get_missing_approvals_for_file(
 
 
 def gather_missing_approvals(
-    modified_files: list[str], codeowners: CodeOwners, approved_reviews: list[str], org: Organization.Organization
+    modified_files: list[str], codeowners: CodeOwners, approved_reviews: list[str], org: Organization.Organization | None
 ) -> dict[str, list[str]]:
     """
     Checks approvals for all modified files.
@@ -146,7 +143,10 @@ def check_all_owners_approved(args: argparse.Namespace) -> bool:
     g = Github(github_token)
     repo: Repository.Repository = g.get_repo(args.repo_name)
     pr: PullRequest.PullRequest = repo.get_pull(args.pr_number)
-    org: Organization.Organization = g.get_organization(args.repo_name.split("/")[0])
+    try:
+        org: Organization.Organization | None = g.get_organization(args.repo_name.split("/")[0])
+    except Exception as e:
+        org = None
 
     # Fetch necessary data
     codeowners = get_codeowners(repo)

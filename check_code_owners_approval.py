@@ -64,15 +64,11 @@ def get_approved_reviews(pr: PullRequest.PullRequest) -> list[str]:
     Considers only the latest review state per user.
     """
     reviews = pr.get_reviews()
+    approvals = [review.user.login for review in reviews if review.state == "APPROVED"]
 
-    latest_reviews: dict[str, PullRequest.Review] = {}
+    logging.debug(f"Fetched approved reviews: {approvals}")
 
-    for review in reviews:
-        user = review.user.login
-        if user not in latest_reviews or review.submitted_at > latest_reviews[user].submitted_at:
-            latest_reviews[user] = review
-
-    return [user for user, review in latest_reviews.items() if review.state == "APPROVED"]
+    return approvals
 
 
 @lru_cache(maxsize=None)

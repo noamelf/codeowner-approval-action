@@ -66,7 +66,7 @@ def get_approved_reviews(pr: PullRequest.PullRequest) -> list[str]:
     reviews = pr.get_reviews()
     approvals = [review.user.login for review in reviews if review.state == "APPROVED"]
 
-    logging.debug(f"Fetched approved reviews: {approvals}")
+    logging.info(f"Fetched approved reviews: {approvals}")
 
     return approvals
 

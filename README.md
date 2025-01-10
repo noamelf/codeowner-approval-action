@@ -98,8 +98,8 @@ jobs:
           github-token: ${{ steps.app-token.outputs.token }}
 ```
 
-- **`app-id`**: The ID of your GitHub App.  
-- **`app-private-key`**: The private key for your GitHub App.  
+- **`app-id`**: The ID of your GitHub App.
+- **`app-private-key`**: The private key for your GitHub App.
 - **`owner`**: The organization name.
 
 This workflow generates a token via the `actions/create-github-app-token@v1` action and passes it to the `codeowner-approval-action`.

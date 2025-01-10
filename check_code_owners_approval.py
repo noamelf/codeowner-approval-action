@@ -10,6 +10,7 @@ import os
 import sys
 import logging
 from functools import lru_cache
+from collections.abc import Sequence
 
 from codeowners import CodeOwners
 from github import Github, Repository, PullRequest, Organization
@@ -39,6 +40,8 @@ def get_codeowners(repo: Repository.Repository) -> CodeOwners:
     for path in codeowners_paths:
         try:
             contents = repo.get_contents(path)
+            if isinstance(contents, list):
+                contents = contents[0]
             codeowners_content = contents.decoded_content.decode("utf-8")
             logging.info(f"Found CODEOWNERS file at: {path}")
             break
@@ -58,13 +61,13 @@ def get_modified_files(pr: PullRequest.PullRequest) -> list[str]:
     return [file.filename for file in pr.get_files()]
 
 
-def get_approved_reviews(pr: PullRequest.PullRequest) -> list[str]:
+def get_approved_reviews(pr: PullRequest.PullRequest) -> set[str]:
     """
     Returns a list of users who have approved the PR.
     Considers only the latest review state per user.
     """
     reviews = pr.get_reviews()
-    approvals = [review.user.login for review in reviews if review.state == "APPROVED"]
+    approvals = set(review.user.login for review in reviews if review.state == "APPROVED")
 
     logging.info(f"Fetched approved reviews: {approvals}")
 
@@ -82,7 +85,7 @@ def get_team_members(org: Organization.Organization, team_slug: str) -> list[str
     return members
 
 
-def get_file_owners(codeowners: CodeOwners, filepath: str) -> list[tuple[str, str]]:
+def get_file_owners(codeowners: CodeOwners, filepath: str) -> Sequence[tuple[str, str]]:
     """
     Returns a list of owners for the given file path.
     """
@@ -90,7 +93,7 @@ def get_file_owners(codeowners: CodeOwners, filepath: str) -> list[tuple[str, st
 
 
 def get_missing_approvals_for_file(
-    file: str, codeowners: CodeOwners, approved_reviews: list[str], org: Organization.Organization | None
+    file: str, codeowners: CodeOwners, approved_reviews: set[str], org: Organization.Organization | None
 ) -> list[str]:
     """
     Checks if all owners (teams and individuals) for a file have approved the PR.
@@ -105,14 +108,18 @@ def get_missing_approvals_for_file(
             team_members = get_team_members(org, team_slug)
             if not any(member in approved_reviews for member in team_members):
                 missing_approvals.append(owner_name)
-        elif owner_name not in approved_reviews:
-            missing_approvals.append(owner_name)
+        else:
+            if owner_name.replace("@", "") not in approved_reviews:
+                missing_approvals.append(owner_name)
 
     return missing_approvals
 
 
 def gather_missing_approvals(
-    modified_files: list[str], codeowners: CodeOwners, approved_reviews: list[str], org: Organization.Organization | None
+    modified_files: list[str],
+    codeowners: CodeOwners,
+    approved_reviews: set[str],
+    org: Organization.Organization | None,
 ) -> dict[str, list[str]]:
     """
     Checks approvals for all modified files.
@@ -141,7 +148,7 @@ def check_all_owners_approved(args: argparse.Namespace) -> bool:
     pr: PullRequest.PullRequest = repo.get_pull(args.pr_number)
     try:
         org: Organization.Organization | None = g.get_organization(args.repo_name.split("/")[0])
-    except Exception as e:
+    except Exception:
         org = None
 
     # Fetch necessary data

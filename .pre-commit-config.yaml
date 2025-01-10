@@ -27,5 +27,8 @@ repos:
     rev: v1.11.2
     hooks:
       - id: mypy
-        additional_dependencies: [types-PyYAML]
-        exclude: "build/"
+        args:
+          - "--python-version=3.12"
+        additional_dependencies:
+          - codeowners
+          - pygithub

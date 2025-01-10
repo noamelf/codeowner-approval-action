@@ -1,4 +1,4 @@
-# Codeowners Approval Action
+# Codeowners Multi-Approval Action
 
 This GitHub Action extends the functionality of GitHub's `CODEOWNERS` feature by requiring **all codeowners** listed for a file or directory to approve a pull request before it can be merged. This ensures stricter review policies, particularly for critical or shared code areas.
 
@@ -55,7 +55,7 @@ The action is triggered by the `pull_request_review` event when a review is subm
 
 To handle teams in the `CODEOWNERS` file, the action requires a GitHub token with the following permissions:
 
-- `read:repo`
+- `repo`
 - `read:org`
 
 ### Options to Provide the Token

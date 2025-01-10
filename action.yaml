@@ -1,5 +1,5 @@
-name: "Codeowner Approval Checker"
-description: "Ensure all code owners (including GitHub teams) approve a PR before merging."
+name: "Codeowners Multi-Approval Check"
+description: "Extends GitHub's codeowners feature by requiring all codeowners listed to approve a pull request, and not just one of them"
 inputs:
   pr-number:
     description: "Pull request number"
@@ -10,6 +10,9 @@ inputs:
   github-token:
     description: "GitHub token"
     required: true
+branding:
+  icon: "git-pull-request"
+  color: "blue"
 runs:
   using: "docker"
   image: "Dockerfile"

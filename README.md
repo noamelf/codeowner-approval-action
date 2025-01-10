@@ -55,7 +55,7 @@ The action is triggered by the `pull_request_review` event when a review is subm
 
 To handle teams in the `CODEOWNERS` file, the action requires a GitHub token with the following permissions:
 
-- `read:repo`
+- `repo`
 - `read:org`
 
 ### Options to Provide the Token

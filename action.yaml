@@ -1,5 +1,5 @@
 name: "Codeowners Multi-Approval Check"
-description: "Extends the functionality of GitHub's `CODEOWNERS` feature by requiring all codeowners listed to approve a pull request, and not just one of them"
+description: "Extends GitHub's codeowners feature by requiring all codeowners listed to approve a pull request, and not just one of them"
 inputs:
   pr-number:
     description: "Pull request number"

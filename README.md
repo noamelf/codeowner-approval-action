@@ -1,4 +1,4 @@
-# Codeowners Approval Action
+# Codeowners Multi-Approval Action
 
 This GitHub Action extends the functionality of GitHub's `CODEOWNERS` feature by requiring **all codeowners** listed for a file or directory to approve a pull request before it can be merged. This ensures stricter review policies, particularly for critical or shared code areas.
 
